@@ -9,7 +9,7 @@ interface Pos {
 }
 
 /**
- * Represents a generic immutable board.
+ * Represents a generic board.
  *
  * This is just a data structure allowing us to associate positions on a board with
  * different values.
@@ -37,16 +37,6 @@ export class Board<T> {
     private readonly size: number,
   ) {}
 
-  private clone() {
-    const cloned = Board.ofSize(this.size);
-    for (let y = 0; y < this.size; ++y) {
-      for (let x = 0; x < this.size; ++x) {
-        cloned.repr[y][x] = this.repr[y][x];
-      }
-    }
-    return cloned;
-  }
-
   /**
    * Modify a certain position on the board
    *
@@ -54,14 +44,12 @@ export class Board<T> {
    * @param value the value to set that position to
    */
   set({ x, y }: Pos, value: T) {
-    const cloned = this.clone();
-    cloned.repr[y][x] = value;
-    return cloned;
+    this.repr[y][x] = value;
   }
 
   /**
    * Get a certain position on the board
-   * 
+   *
    * @param param0 the position to fetch
    * @return null if the value isn't present, otherwise the value
    */
