@@ -15,27 +15,21 @@ interface Pos {
  * different values.
  */
 export class Board<T> {
+  private readonly repr: (T | null)[][];
+
   /**
-   * Create a square board with a certain size
-   *
-   * @param size the number of rows and columns the board should have
+   * Construct a square board of a certain size
    */
-  static ofSize<T>(size: number) {
-    const rows: (T | null)[][] = [];
+  constructor(size: number) {
+    this.repr = [];
     for (let y = 0; y < size; ++y) {
       const row = [];
       for (let x = 0; x < size; ++x) {
         row.push(null);
       }
-      rows.push(row);
+      this.repr.push(row);
     }
-    return new Board(rows, size);
   }
-
-  private constructor(
-    private readonly repr: (T | null)[][],
-    private readonly size: number,
-  ) {}
 
   /**
    * Modify a certain position on the board
