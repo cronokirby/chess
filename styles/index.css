@@ -8,5 +8,13 @@ html {
 
 body {
   height: 100%;
-  @apply font-sans bg-main-100;
+  @apply font-sans;
+}
+
+.h-128 {
+  height: 32rem;
+}
+
+.w-128 {
+  width: 32rem;
 }
