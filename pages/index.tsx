@@ -1,81 +1,68 @@
 import Head from 'next/head';
-import { KnightBlack } from '../components/pieces';
 import React from 'react';
-
-type Pos = { x: number; y: number };
-
-function samePos(a: Pos, b: Pos) {
-  return a.x === b.x && a.y === b.y;
-}
-
-interface Square {
-  pos: Pos;
-  white: boolean;
-}
-
-function makeGrid(): Square[] {
-  const squares: Square[] = [];
-  for (let x = 0; x < 8; ++x) {
-    for (let y = 0; y < 8; ++y) {
-      const white = ((x ^ y) & 1) === 0;
-      squares.push({ pos: { x, y }, white });
-    }
-  }
-  return squares;
-}
+import ShowPiece from '../components/ShowPiece';
+import { Color, Pos, VisualChessBoard } from '../src/chess';
 
 type Action =
-  | { type: 'Move'; to: Pos }
-  | { type: 'Hover'; over: Pos }
-  | { type: 'LeaveHover' };
+  | { type: 'OnDragStart'; on: Pos }
+  | { type: 'OnDragEnter'; over: Pos }
+  | { type: 'OnDragLeave' }
+  | { type: 'OnDragEnd'; on: Pos };
 
-interface State {
-  hovered: Pos | null;
-  positioned: Pos;
-}
+type State = VisualChessBoard;
 
 function reduce(state: State, action: Action): State {
-  console.log(action);
+  const cloned = state.clone();
+  console.log('action');
   switch (action.type) {
-    case 'Move':
-      return { ...state, positioned: action.to, hovered: null };
-    case 'Hover':
-      return { ...state, hovered: action.over };
-    case 'LeaveHover':
-      return { ...state, hovered: null };
+    case 'OnDragStart':
+      cloned.onDragStart(action.on);
+      break;
+    case 'OnDragEnter':
+      cloned.onDragEnter(action.over);
+      break;
+    case 'OnDragLeave':
+      cloned.onDragLeave();
+      break;
+    case 'OnDragEnd':
+      cloned.onDragEnd(action.on);
+      break;
   }
+  return cloned;
 }
 
 function Board() {
-  const [{ hovered, positioned }, dispatch] = React.useReducer(reduce, {
-    hovered: null,
-    positioned: { x: 0, y: 0 },
-  });
+  const [board, dispatch] = React.useReducer(reduce, new VisualChessBoard());
+
   return (
     <ul className="grid grid-cols-8 w-full h-full">
-      {makeGrid().map(({ white, pos }, i) => (
+      {[...board.squares()].map(({ pos, color, piece, hovered }, i) => (
         <li
           key={i}
-          onDrop={() => dispatch({ type: 'Move', to: pos })}
+          onDrop={() => dispatch({ type: 'OnDragEnd', on: pos })}
           onDragOver={(e) => {
-            dispatch({ type: 'Hover', over: pos });
+            dispatch({ type: 'OnDragEnter', over: pos });
             e.preventDefault();
           }}
-          onDragLeave={() => dispatch({ type: 'LeaveHover' })}
+          onDragLeave={() => dispatch({ type: 'OnDragLeave' })}
           className={`relative flex items-center justify-center ${
-            white ? 'bg-main-100' : 'bg-main-700'
+            color === Color.White ? 'bg-main-100' : 'bg-main-700'
           }`}
         >
           <div
             className={`transition-all duration-200 absolute bg-main-300 w-full h-full ${
-              hovered && samePos(hovered, pos) ? 'opacity-50' : 'opacity-0'
+              hovered ? 'opacity-50' : 'opacity-0'
             }`}
           ></div>
-          {samePos(positioned, pos) ? (
-            <div className="absolute w-full h-full" draggable>
-              <KnightBlack />
+          {!piece ? null : (
+            <div
+              className="absolute w-full h-full"
+              draggable
+              onDragStart={() => dispatch({ type: 'OnDragStart', on: pos })}
+            >
+              <ShowPiece piece={piece} />
             </div>
-          ) : null}
+          )}
         </li>
       ))}
     </ul>
@@ -87,7 +74,7 @@ const Home = () => (
     <Head>
       <title>Chess</title>
     </Head>
-    <div className="w-128 h-128">
+    <div className="board-container">
       <Board></Board>
     </div>
   </div>

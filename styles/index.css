@@ -18,3 +18,8 @@ body {
 .w-128 {
   width: 32rem;
 }
+
+.board-container {
+  height: 50vh;
+  width: 50vh;
+}
