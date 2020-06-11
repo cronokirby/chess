@@ -111,7 +111,12 @@ export enum Color {
  * Represents what kind of piece we have
  */
 export enum PieceKind {
+  Pawn,
   Knight,
+  Bishop,
+  Rook,
+  Queen,
+  King,
 }
 
 /**
@@ -138,7 +143,24 @@ class LogicalChessBoard {
   constructor(board?: Board<Piece>) {
     if (!board) {
       board = new Board(8);
-      board.set({ x: 0, y: 0 }, { color: Color.Black, kind: PieceKind.Knight });
+      for (let x = 0; x < 8; ++x) {
+        board.set({ x, y: 1 }, { color: Color.Black, kind: PieceKind.Pawn });
+        board.set({ x, y: 6 }, { color: Color.White, kind: PieceKind.Pawn });
+      }
+      const orders = [
+        PieceKind.Rook,
+        PieceKind.Knight,
+        PieceKind.Bishop,
+        PieceKind.Queen,
+        PieceKind.King,
+        PieceKind.Bishop,
+        PieceKind.Knight,
+        PieceKind.Rook,
+      ];
+      for (let i = 0; i < orders.length; ++i) {
+        board.set({ x: i, y: 0 }, { color: Color.Black, kind: orders[i] });
+        board.set({ x: i, y: 7 }, { color: Color.White, kind: orders[i] });
+      }
     }
     this.board = board;
   }
@@ -235,6 +257,7 @@ export class VisualChessBoard extends LogicalChessBoard {
    * The handler for when a drag event ends
    */
   onDragEnd(pos: Pos) {
+    this.hoveredPos = null;
     if (this.draggingFrom !== null) {
       this.move(this.draggingFrom, pos);
     }
