@@ -178,8 +178,9 @@ class LogicalChessBoard {
     if (piece === null) {
       return false;
     }
-    this.board.set(to, piece);
+    // If you set before removing, you might make a piece disappear if you move a piece to itself
     this.board.remove(at);
+    this.board.set(to, piece);
     return true;
   }
 
